@@ -1,19 +1,25 @@
-name: Deploy
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  deploy:
+  ci-pipeline:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm test
+      - run: npm run lint
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Deploy
-        run: echo "Deploying to Staging..."
+  deploy:
+    needs: ci-pipeline # Ensures deploy ONLY runs if CI passes!
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging
+        run: echo "Deploying to staging environment..."
